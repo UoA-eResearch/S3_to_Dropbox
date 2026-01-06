@@ -61,14 +61,18 @@ def save_key(key):
     start = time.time()
     result = dbx.files_save_url(os.getenv("DROPBOX_FOLDER") + key, url)
     while True:
+      try:
         check_result = dbx.files_save_url_check_job_status(result.get_async_job_id())
-        if check_result.is_in_progress():
-            time.sleep(5)
-        else:
-            if check_result.is_failed():
-                print(f"FAILED after {time.time()-start}s", url, check_result)
-                print(df[df.Key == key])
-            return check_result
+      except requests.exceptions.ConnectionError as e:
+        time.sleep(5)
+        continue
+      if check_result.is_in_progress():
+          time.sleep(5)
+      else:
+          if check_result.is_failed():
+              print(f"FAILED after {time.time()-start}s", url, check_result)
+              print(df[df.Key == key])
+          return check_result
 
 
 results = thread_map(save_key, df.Key, max_workers=10)
