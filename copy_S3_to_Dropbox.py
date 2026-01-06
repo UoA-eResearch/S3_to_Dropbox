@@ -23,7 +23,7 @@ s3 = boto3.client(
     aws_secret_access_key=os.getenv("S3_SECRET_KEY"),
     #endpoint_url=os.getenv("S3_ENDPOINT_URL"),
     #config=Config(signature_version="s3v4")
-    config=Config(signature_version=UNSIGNED)
+    #config=Config(signature_version=UNSIGNED)
 )
 dbx = dropbox.Dropbox(os.getenv("DROPBOX_ACCESS_TOKEN"))
 root_namespace_id = dbx.users_get_current_account().root_info.root_namespace_id
