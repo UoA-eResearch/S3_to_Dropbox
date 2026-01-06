@@ -70,8 +70,7 @@ def save_key(key):
           time.sleep(5)
       else:
           if check_result.is_failed():
-              print(f"FAILED after {time.time()-start}s", url, check_result)
-              print(df[df.Key == key])
+              print(f"FAILED after {round(time.time()-start)}s", url, f"{df.Size[df.Key == key].values[0]} bytes", result, check_result)
           return check_result
 
 
