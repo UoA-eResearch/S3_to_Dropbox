@@ -49,11 +49,16 @@ print(df)
 print(f"{len(df[df.Size > 0])} files, {round(df.Size.sum() / 1e9, 2)}GB")
 
 
-def save_key(key):
+def save_key(tup):
+    i, row = tup
+    key = row.Key
+    size = row.Size
     try:
-        dbx.files_get_metadata(os.getenv("DROPBOX_FOLDER") + key)
+        dbx_size = dbx.files_get_metadata(os.getenv("DROPBOX_FOLDER") + key).size
+        assert dbx_size == size, f"Size on Dropbox {dbx_size} != Size on AWS {size}!!!!"
         return
     except dropbox.exceptions.ApiError as e:
+        # File missing - we need to download it
         pass
     url = s3.generate_presigned_url(
         "get_object", Params={"Bucket": os.getenv("S3_BUCKET_NAME"), "Key": key}
@@ -75,6 +80,6 @@ def save_key(key):
           return check_result
 
 
-results = thread_map(save_key, df.Key, max_workers=10)
+results = thread_map(save_key, df.iterrows(), max_workers=10, total=len(df))
 failures = [r.is_failed() for r in results if r is not None]
 print(f"{sum(failures)} failures / {len(results)} files")
